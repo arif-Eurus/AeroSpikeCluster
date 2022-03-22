@@ -1,28 +1,50 @@
-def last_node_name = ''
 def nodeip = ''
+def ec2_node_name=''
 pipeline {
   agent any
-  stages {
-
+    parameters {
+            string(defaultValue: '', name: 'NODE_NAME', trim: true)
+        }
+    stages {
     stage('Get Last Node of Cluster') {
-      steps {
-          script {
-            try {
-                last_node_name = sh script:"""#!/bin/bash
-                  source ./script/aerospike_delete_node.sh
-                  get_last_node_metadata
-                  """, returnStdout: true
-                println "Agent info within script: ${last_node_name}"
-              }
-            catch (err) {
-                currentBuild.result = 'FAILURE'
-                emailExtraMsg = "Build Failure:"+ err.getMessage()
-                throw err
+        when {  expression { params.NODE_NAME.isEmpty() } }
+        steps {
+            script {
+                try {
+                    ec2_node_name = sh script:"""#!/bin/bash
+                    source ./script/aerospike_delete_node.sh
+                    get_last_node_metadata
+                    """, returnStdout: true
+                    println "Agent info within script: ${ec2_node_name}"
+                }
+                catch (err) {
+                    currentBuild.result = 'FAILURE'
+                    emailExtraMsg = "Build Failure:"+ err.getMessage()
+                    throw err
+                }
               }
           }
         }
-      }
+    stage('Get Node of Cluster') {
 
+          when { expression { !params.NODE_NAME.isEmpty()  } }
+          steps {
+              script {
+                  try {
+                        ec2_node_name = sh script:"""#!/bin/bash
+                        source ./script/aerospike_delete_node.sh
+                        get_node_name  \$(echo "${params.NODE_NAME}")
+                        """, returnStdout: true
+                        println "Agent info within script: ${ec2_node_name}"
+                    }
+                    catch (err) {
+                        currentBuild.result = 'FAILURE'
+                        emailExtraMsg = "Build Failure:"+ err.getMessage()
+                        throw err
+                    }
+                } 
+            }
+        }
     stage('Extract Last Node IP') {
       steps {
         script {
@@ -41,7 +63,6 @@ pipeline {
           }
         }
       }
-
     stage('Check Migration on Aerospike Cluster') { 
       steps {
         script {
@@ -58,7 +79,6 @@ pipeline {
           }     
         }  
       }
-
     stage('Quiece Last Node') {
       steps {
         script {
