@@ -7,31 +7,37 @@ pipeline {
         }
     stages {
       stage('Get Last Node of Cluster') {
+        when {
+                // Only say hello if a "greeting" is requested
+                expression { return params.NODE_NAME.isEmpty() }
+            }
+
         steps {
             script {
-              if(params.NODE_NAME.isEmpty()){
-                  try {
-                      ec2_node_name = sh script:"""#!/bin/bash
-                      source ./script/aerospike_delete_node.sh
-                      get_last_node_metadata
-                      """, returnStdout: true
-                      println "Agent info within script: ${ec2_node_name}"
-                  }
-                  catch (err) {
-                      currentBuild.result = 'FAILURE'
-                      emailExtraMsg = "Build Failure:"+ err.getMessage()
-                      throw err
-                  }
-              }
+                try {
+                    ec2_node_name = sh script:"""#!/bin/bash
+                    source ./script/aerospike_delete_node.sh
+                    get_last_node_metadata
+                    """, returnStdout: true
+                    println "Agent info within script: ${ec2_node_name}"
+                }
+                catch (err) {
+                    currentBuild.result = 'FAILURE'
+                    emailExtraMsg = "Build Failure:"+ err.getMessage()
+                    throw err
+                }
               }
           }
         }
 
       stage('Get Node of Cluster') {
+            when {
+                expression { return !params.NODE_NAME.isEmpty() }
+            }
+
         steps {
             script {
-              if(!params.NODE_NAME){
-                  try {
+                try {
                       ec2_node_name = sh script:"""#!/bin/bash
                       source ./script/aerospike_delete_node.sh
                       get_node_name
@@ -43,8 +49,7 @@ pipeline {
                       emailExtraMsg = "Build Failure:"+ err.getMessage()
                       throw err
                   }
-              }
-              }
+              } 
           }
         }
       stage('Extract Last Node IP') {
