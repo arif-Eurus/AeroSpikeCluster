@@ -80,12 +80,12 @@ function get_node_name {
             fi
         done
     fi
-
+    echo "Flag Status : ${flag_node_found }"
     if $flag_node_found 
     then
         echo ${ec2_node_name}
     else
-        echo "Wrong Inventory Type"
+        echo "Wrong Inventory Type1"
         exit 1
     fi
 }
