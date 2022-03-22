@@ -33,7 +33,7 @@ pipeline {
                 try {
                       ec2_node_name = sh script:"""#!/bin/bash
                       source ./script/aerospike_delete_node.sh
-                      get_node_name  \$(echo "${ec2_node_name}")
+                      get_node_name  \$(echo "${params.NODE_NAME}")
                       """, returnStdout: true
                       println "Agent info within script: ${ec2_node_name}"
                   }
