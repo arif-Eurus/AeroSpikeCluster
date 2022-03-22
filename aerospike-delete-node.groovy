@@ -8,7 +8,7 @@ pipeline {
     stages {
       stage('Get Last Node of Cluster') {
         when {
-                expression { return params.NODE_NAME.isEmpty() }
+                expression { params.NODE_NAME.isEmpty()=true }
             }
 
         steps {
@@ -31,7 +31,7 @@ pipeline {
 
       stage('Get Node of Cluster') {
             when {
-                expression { return !params.NODE_NAME.isEmpty() }
+                expression { !params.NODE_NAME.isEmpty()=false }
             }
         steps {
             script {
