@@ -11,10 +11,10 @@ pipeline {
         steps {
             script {
                 try {
-                    ec2_node_name = sh script:"""#!/bin/bash
-                    source ./script/aerospike_delete_node.sh
-                    get_last_node_metadata
-                    """, returnStdout: true
+                    // ec2_node_name = sh script:"""#!/bin/bash
+                    // source ./script/aerospike_delete_node.sh
+                    // get_last_node_metadata
+                    // """, returnStdout: true
                     println "Agent info within script: ${ec2_node_name}"
                 }
                 catch (err) {
