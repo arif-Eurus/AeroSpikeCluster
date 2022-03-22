@@ -31,7 +31,7 @@ pipeline {
 
       stage('Get Node of Cluster') {
             when {
-                expression { !params.NODE_NAME.isEmpty()=false }
+                expression { params.NODE_NAME.isEmpty()=false }
             }
         steps {
             script {
