@@ -60,7 +60,7 @@ function get_node_name {
         fi 
         for node_name in $name; do 
             echo "***${node_name}***"
-            if [[ "${node_name}" == "${ec2_node_name}" ]]; then 
+            if [[ "$node_name" = "$ec2_node_name" ]]; then 
                 echo "found instance"
                 flag_node_found=1
                 break
@@ -77,7 +77,7 @@ function get_node_name {
         fi 
         for node_name in $name; do 
             echo "***${node_name}***"
-            if [[ "${node_name}" == "${ec2_node_name}" ]]; then 
+            if [[ "$node_name" = "$ec2_node_name" ]]; then  
                 echo "found instance"
                 break
             fi
