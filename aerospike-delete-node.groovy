@@ -8,7 +8,6 @@ pipeline {
     stages {
       stage('Get Last Node of Cluster') {
         when {
-                // Only say hello if a "greeting" is requested
                 expression { return params.NODE_NAME.isEmpty() }
             }
 
@@ -34,7 +33,6 @@ pipeline {
             when {
                 expression { return !params.NODE_NAME.isEmpty() }
             }
-
         steps {
             script {
                 try {
