@@ -26,29 +26,28 @@ pipeline {
               }
           }
         }
-      }
 
-    stage('Get Node of Cluster') {
-      steps {
-          script {
-            if(!params.NODE_NAME){
-                try {
-                    ec2_node_name = sh script:"""#!/bin/bash
-                    source ./script/aerospike_delete_node.sh
-                    get_node_name
-                    """, returnStdout: true
-                    println "Agent info within script: ${ec2_node_name}"
-                }
-                catch (err) {
-                    currentBuild.result = 'FAILURE'
-                    emailExtraMsg = "Build Failure:"+ err.getMessage()
-                    throw err
-                }
-            }
-            }
+      stage('Get Node of Cluster') {
+        steps {
+            script {
+              if(!params.NODE_NAME){
+                  try {
+                      ec2_node_name = sh script:"""#!/bin/bash
+                      source ./script/aerospike_delete_node.sh
+                      get_node_name
+                      """, returnStdout: true
+                      println "Agent info within script: ${ec2_node_name}"
+                  }
+                  catch (err) {
+                      currentBuild.result = 'FAILURE'
+                      emailExtraMsg = "Build Failure:"+ err.getMessage()
+                      throw err
+                  }
+              }
+              }
+          }
         }
-      }
-    stage('Extract Last Node IP') {
+      stage('Extract Last Node IP') {
       steps {
         script {
             try {
@@ -68,3 +67,4 @@ pipeline {
       }
  
 }
+      }
