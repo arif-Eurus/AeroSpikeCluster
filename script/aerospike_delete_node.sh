@@ -80,7 +80,7 @@ function get_node_name {
             fi
         done
     fi
-    echo "Flag Status : ${flag_node_found }"
+    echo "Flag Status : ${flag_node_found}"
     if $flag_node_found 
     then
         echo ${ec2_node_name}
