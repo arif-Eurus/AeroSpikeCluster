@@ -25,11 +25,11 @@ pipeline {
               }
           }
         }
-
       stage('Get Node of Cluster') {
-            when { expression { !params.NODE_NAME.isEmpty()  } }
+        when { expression { !params.NODE_NAME.isEmpty()  } }
         steps {
             script {
+                echo "************Get Node of Cluster************"
                 try {
                       ec2_node_name = sh script:"""#!/bin/bash
                       source ./script/aerospike_delete_node.sh
