@@ -17,6 +17,7 @@ pipeline {
                 """, returnStdout: true
                 flag_node_exists= statusCode != 0
                 println "Agent Not Found"
+                println flag_node_exists
               }
             catch (err) {
                 currentBuild.result = 'FAILURE'
@@ -27,10 +28,12 @@ pipeline {
         }
     }
      stage('Get Node ${NODE_NAME} to Host file') {
+      when {  expression { !params.NODE_NAME.isEmpty() && flag_node_exists } }
       steps {
-        when {  expression { !params.NODE_NAME.isEmpty() && flag_node_exists } }
         script {
           try {
+            println "Adding node ${NODE_NAME}"
+
             node_dns = sh script:"""#!/bin/bash
               source ./script/aerospike_add_node.sh
               add_new_node_in_ansible_inventory  \$(echo "${params.NODE_NAME}")
@@ -46,8 +49,8 @@ pipeline {
       }
     }
     stage('Get Node Number/Add to Host file') {
+      when {  expression { params.NODE_NAME.isEmpty() } }
       steps {
-        when {  expression { params.NODE_NAME.isEmpty() } }
         script {
           try {
             node_dns = sh script:"""#!/bin/bash
