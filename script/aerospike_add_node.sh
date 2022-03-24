@@ -71,7 +71,7 @@ function add_new_node_in_ansible_inventory {
   rm -rf userdata.txt
   cat './script/aerospike_route_53_dns_record.json'
   echo  "*********** host.yaml"
-  cat './ansible/inventories/stg/hosts.yaml'
+  cat ./ansible/inventories/${inventory_env}/hosts.yaml
   echo "*******"
   # Userdata to update the host name 
 cat <<EOF >> userdata.txt
