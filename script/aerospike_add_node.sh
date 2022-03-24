@@ -54,6 +54,7 @@ function add_new_node_in_ansible_inventory {
     fi
   done
   hostname=$1
+  echo "param node name $hostname"
   node_number= echo $1 | sed 's/[^0-9]//g'
 
   new_line_number=`expr $line_number + 1`
