@@ -4,13 +4,13 @@ pipeline {
   agent any 
   stages {
       stage('Check Node Exists') {
-        when {  expression { params.custom_node_check && (params.NODE_NAME!=null && !params.NODE_NAME.isEmpty()) } }
+        when {  expression { params.custom_node_check && (params.custom_node_name!=null && !params.custom_node_name.isEmpty()) } }
         steps {
           script {
             try {
               def statusCode = sh script:"""#!/bin/bash
                 source ./script/aerospike_add_node.sh
-                check_node_exists \$(echo "${params.custom_node_name}")
+                check_node_exists \$(echo "${params.custom_custom_node_name}")
                 """, returnStdout: true
                 flag_node_exists= statusCode != 0
                 println "Agent Not Found"
@@ -24,13 +24,13 @@ pipeline {
         }
     }
      stage('Get Custom Node Number/Add to Host file') {
-      when {  expression { (params.NODE_NAME!=null && !params.NODE_NAME.isEmpty())&& params.custom_node_check && flag_node_exists } }
+      when {  expression { (params.custom_node_name!=null && !params.custom_node_name.isEmpty())&& params.custom_node_check && flag_node_exists } }
       steps {
         script {
           try {
             node_dns = sh script:"""#!/bin/bash
               source ./script/aerospike_add_node.sh
-              add_new_node_in_ansible_inventory  \$(echo "${params.NODE_NAME}")
+              add_new_node_in_ansible_inventory  \$(echo "${params.custom_node_name}")
               """, returnStdout: true
               println "Agent info within script: ${node_dns}"
             }
@@ -43,7 +43,7 @@ pipeline {
       }
     }
     stage('Get Node Number/Add to Host file') {
-      when {  expression { (params.NODE_NAME==null || params.NODE_NAME.isEmpty()) && ! params.custom_node_check} }
+      when {  expression { (params.custom_node_name==null || params.custom_node_name.isEmpty()) && ! params.custom_node_check} }
       steps {
         script {
           try {
