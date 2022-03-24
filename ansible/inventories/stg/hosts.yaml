@@ -46,6 +46,7 @@ all:
     aerospikeeast:
       hosts:
         aerospike-1.databases.groveops.net:
+        aerospike-1.stg.groveops.net:
 
           
     # aerospikewest:
