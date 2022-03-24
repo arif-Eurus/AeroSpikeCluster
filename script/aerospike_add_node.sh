@@ -54,8 +54,8 @@ function add_new_node_in_ansible_inventory {
     fi
   done
   hostname=$1
-  node_number= echo $1 | sed 's/[^0-9]//g'
-  echo "param node name: $hostname"
+  node_number= echo $hostname | sed 's/[^0-9]//g'
+  echo "param node name: $hostname Node Number :$node_number"
   new_line_number=`expr $line_number + 1`
   new_dns_recordname=aerospike-${node_number}.$inventory_env.$hosted_zone
   new_inventory=aerospike-${node_number}.$inventory_env.$hosted_zone:
