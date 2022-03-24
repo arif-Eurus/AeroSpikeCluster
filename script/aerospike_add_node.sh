@@ -50,7 +50,10 @@ function add_new_node_in_ansible_inventory {
   list_of_resource=$(cat ./ansible/inventories/$inventory_env/hosts.yaml)
   for item in ${list_of_resource[@]}; do
     if [[ ${item} =~ aerospike-[0-9]{0,2}.$inventory_env.$hosted_zone: ]]; then
+      echo "**$item**"
       line_number=$(awk -v x=${item} '$0~x {print NR}' ./ansible/inventories/$inventory_env/hosts.yaml)
+      echo "**$line_number**"
+
     fi
   done
   hostname=$1
