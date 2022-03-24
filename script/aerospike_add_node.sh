@@ -59,10 +59,14 @@ function add_new_node_in_ansible_inventory {
   new_dns_recordname=aerospike-${node_number}.$inventory_env.$hosted_zone
   new_inventory=aerospike-${node_number}.$inventory_env.$hosted_zone:
   new_hostname={$hostname}.$inventory_env
-
+  echo "New Host Name $new_hostname"
   sed -i './script/aerospike_route_53_dns_record.json' -e "s/%RECORDNAME%/${new_dns_recordname}/" ./script/aerospike_route_53_dns_record.json # Adding the Name of recod set in json file 
   sed -i ./ansible/inventories/${inventory_env}/hosts.yaml -e "${new_line_number}s/^[[:space:]]*$/        ${new_inventory}\n/" ./ansible/inventories/$inventory_env/hosts.yaml #adding new entry in the inventry file
   rm -rf userdata.txt
+  cat './script/aerospike_route_53_dns_record.json'
+  echo  "*********** host.yaml"
+  cat './ansible/inventories/$inventory_env/hosts.yaml'
+  echo "*******"
   # Userdata to update the host name 
 cat <<EOF >> userdata.txt
 #!/bin/bash
