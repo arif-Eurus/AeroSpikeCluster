@@ -1,48 +1,48 @@
 #!/bin/bash
-function check_node_exists{
-    set -e
-    num="0"
-    ec2_node_name=$1
-    flag_node_found=false
-    alertid=1
-    host_names=$(aws ec2 describe-vpc-attribute --vpc-id=${vpc_id} --region=${region} --attribute=enableDnsHostnames --output=text | grep ENABLEDNSHOSTNAMES | awk '{print $2}')
-    if [[ "$host_names" == "True" ]]; then
-        if [[ "${inventory_env}" == "stg" ]]; then
-            name=$(aws ec2 describe-instances --filter Name=instance-state-name,Values=running Name=tag:Name,Values=stg_aerospike_* --output=text --region=${region} | grep Name | awk '{print $3;}' )
-        elif [[ "${inventory_env}" == "databases" ]]; then
-            name=$(aws ec2 describe-instances --filter Name=instance-state-name,Values=running Name=tag:Name,Values=extendtv_east_vpc1_aerospike_* --output=text --region=${region} | grep Name | awk '{print $3;}' )
-        else 
-            echo "Wrong Inventory Type"
-            exit 1
-        fi 
-        for node_name in $name; do 
-            if [[ "$node_name" = "$ec2_node_name" ]]; then 
-                flag_node_found=true
-                break
-            fi
-        done
-    else
-        if [[ "${inventory_env}" == "stg" ]]; then
-            name=$(aws ec2 describe-instances --filter Name=instance-state-name,Values=running Name=tag:Name,Values=stg_aerospike_* --output=text --region=${region} | grep Name | awk '{print $3;}' )
-        elif [[ "${inventory_env}" == "databases" ]]; then
-            name=$(aws ec2 describe-instances --filter Name=instance-state-name,Values=running Name=tag:Name,Values=extendtv_east_vpc1_aerospike_* --output=text --region=${region} | grep Name | awk '{print $3;}' )
-        else 
-            echo "Wrong Inventory Type"
-            exit 1
-        fi 
-        for node_name in $name; do 
-            if [[ "$node_name" = "$ec2_node_name" ]]; then  
-                flag_node_found=true
-                break
-            fi
-        done
-    fi
-    if $flag_node_found  
-    then
-        exit 1 
-    else
-        exit 0
-    fi
+function check_node_exists {
+  set -e 
+  num="0"
+  ec2_node_name=$1
+  flag_node_found=false
+  alertid=1
+  host_names=$(aws ec2 describe-vpc-attribute --vpc-id=${vpc_id} --region=${region} --attribute=enableDnsHostnames --output=text | grep ENABLEDNSHOSTNAMES | awk '{print $2}')
+  if [[ "$host_names" == "True" ]]; then
+      if [[ "${inventory_env}" == "stg" ]]; then
+          name=$(aws ec2 describe-instances --filter Name=instance-state-name,Values=running Name=tag:Name,Values=stg_aerospike_* --output=text --region=${region} | grep Name | awk '{print $3;}' )
+      elif [[ "${inventory_env}" == "databases" ]]; then
+          name=$(aws ec2 describe-instances --filter Name=instance-state-name,Values=running Name=tag:Name,Values=extendtv_east_vpc1_aerospike_* --output=text --region=${region} | grep Name | awk '{print $3;}' )
+      else 
+          echo "Wrong Inventory Type"
+          exit 1
+      fi 
+      for node_name in $name; do 
+          if [[ "$node_name" = "$ec2_node_name" ]]; then 
+              flag_node_found=true
+              break
+          fi
+      done
+  else
+      if [[ "${inventory_env}" == "stg" ]]; then
+          name=$(aws ec2 describe-instances --filter Name=instance-state-name,Values=running Name=tag:Name,Values=stg_aerospike_* --output=text --region=${region} | grep Name | awk '{print $3;}' )
+      elif [[ "${inventory_env}" == "databases" ]]; then
+          name=$(aws ec2 describe-instances --filter Name=instance-state-name,Values=running Name=tag:Name,Values=extendtv_east_vpc1_aerospike_* --output=text --region=${region} | grep Name | awk '{print $3;}' )
+      else 
+          echo "Wrong Inventory Type"
+          exit 1
+      fi 
+      for node_name in $name; do 
+          if [[ "$node_name" = "$ec2_node_name" ]]; then  
+              flag_node_found=true
+              break
+          fi
+      done
+  fi
+  if $flag_node_found  
+  then
+      exit 1 
+  else
+      exit 0
+  fi
 }
 
 function add_new_node_in_ansible_inventory {
