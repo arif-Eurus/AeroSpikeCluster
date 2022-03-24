@@ -2,9 +2,12 @@ def nodeip = ''
 def ec2_node_name=''
 pipeline {
   agent any
+    parameters {
+            string(defaultValue: '', name: 'NODE_NAME', trim: true)
+        }
     stages {
     stage('Get Last Node of Cluster') {
-        when {  expression { params.custom_node_name==null || params.custom_node_name.isEmpty() } }
+        when {  expression { params.NODE_NAME.isEmpty() } }
         steps {
             script {
                 try {
@@ -24,13 +27,13 @@ pipeline {
         }
     stage('Get Node of Cluster') {
 
-          when { expression { params.custom_node_name!=null && !params.custom_node_name.isEmpty()  } }
+          when { expression { !params.NODE_NAME.isEmpty()  } }
           steps {
               script {
                   try {
                         ec2_node_name = sh script:"""#!/bin/bash
                         source ./script/aerospike_delete_node.sh
-                        get_node_name  \$(echo "${params.custom_node_name}")
+                        get_node_name  \$(echo "${params.NODE_NAME}")
                         """, returnStdout: true
                         println "Agent info within script: ${ec2_node_name}"
                     }
