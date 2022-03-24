@@ -1,4 +1,83 @@
 #!/bin/bash
+function check_node_exists{
+    set -e
+    num="0"
+    ec2_node_name=$1
+    flag_node_found=false
+    alertid=1
+    host_names=$(aws ec2 describe-vpc-attribute --vpc-id=${vpc_id} --region=${region} --attribute=enableDnsHostnames --output=text | grep ENABLEDNSHOSTNAMES | awk '{print $2}')
+    if [[ "$host_names" == "True" ]]; then
+        if [[ "${inventory_env}" == "stg" ]]; then
+            name=$(aws ec2 describe-instances --filter Name=instance-state-name,Values=running Name=tag:Name,Values=stg_aerospike_* --output=text --region=${region} | grep Name | awk '{print $3;}' )
+        elif [[ "${inventory_env}" == "databases" ]]; then
+            name=$(aws ec2 describe-instances --filter Name=instance-state-name,Values=running Name=tag:Name,Values=extendtv_east_vpc1_aerospike_* --output=text --region=${region} | grep Name | awk '{print $3;}' )
+        else 
+            echo "Wrong Inventory Type"
+            exit 1
+        fi 
+        for node_name in $name; do 
+            if [[ "$node_name" = "$ec2_node_name" ]]; then 
+                flag_node_found=true
+                break
+            fi
+        done
+    else
+        if [[ "${inventory_env}" == "stg" ]]; then
+            name=$(aws ec2 describe-instances --filter Name=instance-state-name,Values=running Name=tag:Name,Values=stg_aerospike_* --output=text --region=${region} | grep Name | awk '{print $3;}' )
+        elif [[ "${inventory_env}" == "databases" ]]; then
+            name=$(aws ec2 describe-instances --filter Name=instance-state-name,Values=running Name=tag:Name,Values=extendtv_east_vpc1_aerospike_* --output=text --region=${region} | grep Name | awk '{print $3;}' )
+        else 
+            echo "Wrong Inventory Type"
+            exit 1
+        fi 
+        for node_name in $name; do 
+            if [[ "$node_name" = "$ec2_node_name" ]]; then  
+                flag_node_found=true
+                break
+            fi
+        done
+    fi
+    if $flag_node_found  
+    then
+        exit 1 
+    else
+        exit 0
+    fi
+}
+
+function add_new_node_in_ansible_inventory {
+  set -e   
+  list_of_resource=$(cat ./ansible/inventories/$inventory_env/hosts.yaml)
+  for item in ${list_of_resource[@]}; do
+    if [[ ${item} =~ aerospike-[0-9]{0,2}.$inventory_env.$hosted_zone: ]]; then
+      line_number=$(awk -v x=${item} '$0~x {print NR}' ./ansible/inventories/$inventory_env/hosts.yaml)
+    fi
+  done
+  
+  node_number= echo $1 | sed 's/[^0-9]//g'
+  new_line_number=`expr $line_number + 1`
+  new_dns_recordname=aerospike-${node_number}.$inventory_env.$hosted_zone
+  new_inventory=aerospike-${node_number}.$inventory_env.$hosted_zone:
+  new_hostname=aerospike-${node_number}.$inventory_env
+
+  sed -i './script/aerospike_route_53_dns_record.json' -e "s/%RECORDNAME%/${new_dns_recordname}/" ./script/aerospike_route_53_dns_record.json # Adding the Name of recod set in json file 
+  sed -i ./ansible/inventories/${inventory_env}/hosts.yaml -e "${new_line_number}s/^[[:space:]]*$/        ${new_inventory}\n/" ./ansible/inventories/$inventory_env/hosts.yaml #adding new entry in the inventry file
+  rm -rf userdata.txt
+  # Userdata to update the host name 
+  cat <<EOF >> userdata.txt
+  #!/bin/bash
+  new_hostname=${new_hostname}
+  new_host_name="PS1='\[\033[01m\]\${new_hostname}\[\033[00m\]:\[\033[01;34m\]\W \[\033[00m\]\u\$ '"  
+  sed -i '$ d' /etc/profile.d/default_prompt.sh
+  sed -i '$ d' /etc/hosts
+  test=$new_dns_recordname
+  privateip=\$(curl http://169.254.169.254/latest/dynamic/instance-identity/document | jq -r '.privateIp')
+  echo "\$privateip  \$test" >>/etc/hosts
+  echo "\$new_host_name">>/etc/profile.d/default_prompt.sh
+  EOF
+  echo ${new_dns_recordname}
+}
+
 function add_node_in_ansible_inventory {
   set -e   
   list_of_resource=$(cat ./ansible/inventories/$inventory_env/hosts.yaml)
