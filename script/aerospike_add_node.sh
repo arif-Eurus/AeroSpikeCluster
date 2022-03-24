@@ -55,17 +55,18 @@ function add_new_node_in_ansible_inventory {
   done
   hostname=$1
   node_number= echo $1 | sed 's/[^0-9]//g'
+
   new_line_number=`expr $line_number + 1`
   new_dns_recordname=aerospike-${node_number}.$inventory_env.$hosted_zone
   new_inventory=aerospike-${node_number}.$inventory_env.$hosted_zone:
-  new_hostname={$hostname}.$inventory_env
+  new_hostname=$hostname.$inventory_env
   echo "New Host Name $new_hostname"
   sed -i './script/aerospike_route_53_dns_record.json' -e "s/%RECORDNAME%/${new_dns_recordname}/" ./script/aerospike_route_53_dns_record.json # Adding the Name of recod set in json file 
   sed -i ./ansible/inventories/${inventory_env}/hosts.yaml -e "${new_line_number}s/^[[:space:]]*$/        ${new_inventory}\n/" ./ansible/inventories/$inventory_env/hosts.yaml #adding new entry in the inventry file
   rm -rf userdata.txt
   cat './script/aerospike_route_53_dns_record.json'
   echo  "*********** host.yaml"
-  cat './ansible/inventories/$inventory_env/hosts.yaml'
+  cat './ansible/inventories/stg/hosts.yaml'
   echo "*******"
   # Userdata to update the host name 
 cat <<EOF >> userdata.txt
@@ -79,7 +80,8 @@ privateip=\$(curl http://169.254.169.254/latest/dynamic/instance-identity/docume
 echo "\$privateip  \$test" >>/etc/hosts
 echo "\$new_host_name">>/etc/profile.d/default_prompt.sh
 EOF
-  echo ${new_dns_recordname}
+echo userdata.txt
+echo ${new_dns_recordname}
 }
 
 function add_node_in_ansible_inventory {
