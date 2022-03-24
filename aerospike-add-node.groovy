@@ -1,19 +1,16 @@
 def node_dns = ''
 def flag_node_exists=false
 pipeline {
-  agent any
-    parameters {
-            string(defaultValue: '', name: 'NODE_NAME', trim: true)
-        }
+  agent any 
   stages {
       stage('Check Node Exists') {
-        when {  expression { !params.NODE_NAME.isEmpty() } }
+        when {  expression { params.custom_node_check && !params.custom_node_name.isEmpty() } }
         steps {
           script {
             try {
               def statusCode = sh script:"""#!/bin/bash
                 source ./script/aerospike_add_node.sh
-                check_node_exists \$(echo "${params.NODE_NAME}")
+                check_node_exists \$(echo "${params.custom_node_name}")
                 """, returnStdout: true
                 flag_node_exists= statusCode != 0
                 println "Agent Not Found"
@@ -26,8 +23,8 @@ pipeline {
           }
         }
     }
-     stage('Get Node ${params.NODE_NAME} to Host file') {
-      when {  expression { !params.NODE_NAME.isEmpty() && flag_node_exists } }
+     stage('Get Custom Node Number/Add to Host file') {
+      when {  expression { !params.custom_node_name.isEmpty()&& params.custom_node_check && flag_node_exists } }
       steps {
         script {
           try {
@@ -46,7 +43,7 @@ pipeline {
       }
     }
     stage('Get Node Number/Add to Host file') {
-      when {  expression { params.NODE_NAME.isEmpty() } }
+      when {  expression { params.NODE_NAME.isEmpty() && ! params.custom_node_check} }
       steps {
         script {
           try {
