@@ -12,7 +12,7 @@ pipeline {
           script {
             try {
               def statusCode = sh script:"""#!/bin/bash
-                source ./script/check_node_exists.sh
+                source ./script/aerospike_add_node.sh
                 check_node_exists \$(echo "${params.NODE_NAME}")
                 """, returnStdout: true
                 flag_node_exists= statusCode != 0
