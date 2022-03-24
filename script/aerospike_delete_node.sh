@@ -42,54 +42,6 @@ function get_last_node_metadata {
     echo ${last_node_name}
 }
 
-function get_node_name {
-    set -e
-    num="0"
-    ec2_node_name=$1
-    flag_node_found=0
-    alertid=1
-    host_names=$(aws ec2 describe-vpc-attribute --vpc-id=${vpc_id} --region=${region} --attribute=enableDnsHostnames --output=text | grep ENABLEDNSHOSTNAMES | awk '{print $2}')
-    if [[ "$host_names" == "True" ]]; then
-        if [[ "${inventory_env}" == "stg" ]]; then
-            name=$(aws ec2 describe-instances --filter Name=instance-state-name,Values=running Name=tag:Name,Values=stg_aerospike_* --output=text --region=${region} | grep Name | awk '{print $3;}' )
-        elif [[ "${inventory_env}" == "databases" ]]; then
-            name=$(aws ec2 describe-instances --filter Name=instance-state-name,Values=running Name=tag:Name,Values=extendtv_east_vpc1_aerospike_* --output=text --region=${region} | grep Name | awk '{print $3;}' )
-        else 
-            echo "Wrong Inventory Type"
-            exit 1
-        fi 
-        for node_name in $name; do 
-            if [[ "${node_name}" == "${ec2_node_name}" ]]; then 
-                flag_node_found=1
-                break
-            fi
-        done
-    else
-        if [[ "${inventory_env}" == "stg" ]]; then
-            name=$(aws ec2 describe-instances --filter Name=instance-state-name,Values=running Name=tag:Name,Values=stg_aerospike_* --output=text --region=${region} | grep Name | awk '{print $3;}' )
-        elif [[ "${inventory_env}" == "databases" ]]; then
-            name=$(aws ec2 describe-instances --filter Name=instance-state-name,Values=running Name=tag:Name,Values=extendtv_east_vpc1_aerospike_* --output=text --region=${region} | grep Name | awk '{print $3;}' )
-        else 
-            echo "Wrong Inventory Type"
-            exit 1
-        fi 
-        for node_name in $name; do 
-            if [[ "${node_name}" == "${ec2_node_name}" ]]; then 
-                flag_node_found=1
-                break
-            fi
-        done
-    fi
-
-    if $flag_node_found 
-    then
-        echo ${ec2_node_name}
-    else
-        echo "Wrong Inventory Type"
-        exit 1
-    fi
-}
-
 function extract_ip_of_last_node {
     set -e
     last_node_name=$1

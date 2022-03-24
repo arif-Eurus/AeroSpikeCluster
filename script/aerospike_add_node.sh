@@ -18,19 +18,19 @@ function add_node_in_ansible_inventory {
   sed -i './script/aerospike_route_53_dns_record.json' -e "s/%RECORDNAME%/${new_dns_recordname}/" ./script/aerospike_route_53_dns_record.json # Adding the Name of recod set in json file 
   sed -i ./ansible/inventories/${inventory_env}/hosts.yaml -e "${new_line_number}s/^[[:space:]]*$/        ${new_inventory}\n/" ./ansible/inventories/$inventory_env/hosts.yaml #adding new entry in the inventry file
   rm -rf userdata.txt
-  # Userdata to update the host name 
-  cat <<EOF >> userdata.txt
-  #!/bin/bash
-  new_hostname=${new_hostname}
-  new_host_name="PS1='\[\033[01m\]\${new_hostname}\[\033[00m\]:\[\033[01;34m\]\W \[\033[00m\]\u\$ '"  
-  sed -i '$ d' /etc/profile.d/default_prompt.sh
-  sed -i '$ d' /etc/hosts
-  test=$new_dns_recordname
-  privateip=\$(curl http://169.254.169.254/latest/dynamic/instance-identity/document | jq -r '.privateIp')
-  echo "\$privateip  \$test" >>/etc/hosts
-  echo "\$new_host_name">>/etc/profile.d/default_prompt.sh
-  EOF
-  echo ${new_dns_recordname}
+# Userdata to update the host name 
+cat <<EOF >> userdata.txt
+#!/bin/bash
+new_hostname=${new_hostname}
+new_host_name="PS1='\[\033[01m\]\${new_hostname}\[\033[00m\]:\[\033[01;34m\]\W \[\033[00m\]\u\$ '"  
+sed -i '$ d' /etc/profile.d/default_prompt.sh
+sed -i '$ d' /etc/hosts
+test=$new_dns_recordname
+privateip=\$(curl http://169.254.169.254/latest/dynamic/instance-identity/document | jq -r '.privateIp')
+echo "\$privateip  \$test" >>/etc/hosts
+echo "\$new_host_name">>/etc/profile.d/default_prompt.sh
+EOF
+echo ${new_dns_recordname}
 }
 
 function create_instance_and_dns_record {
