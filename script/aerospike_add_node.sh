@@ -85,7 +85,7 @@ privateip=\$(curl http://169.254.169.254/latest/dynamic/instance-identity/docume
 echo "\$privateip  \$test" >>/etc/hosts
 echo "\$new_host_name">>/etc/profile.d/default_prompt.sh
 EOF
-echo "./userdata.txt"
+  echo ${new_dns_recordname}
 }
 
 function add_node_in_ansible_inventory {
