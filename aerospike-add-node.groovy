@@ -4,7 +4,7 @@ pipeline {
   agent any 
   stages {
       stage('Check Node Exists') {
-        when {  expression { params.custom_node_check && !params.custom_node_name.isEmpty() } }
+        when {  expression { params.custom_node_check && (params.NODE_NAME!=null && !params.NODE_NAME.isEmpty()) } }
         steps {
           script {
             try {
@@ -24,7 +24,7 @@ pipeline {
         }
     }
      stage('Get Custom Node Number/Add to Host file') {
-      when {  expression { !params.custom_node_name.isEmpty()&& params.custom_node_check && flag_node_exists } }
+      when {  expression { (params.NODE_NAME!=null && !params.NODE_NAME.isEmpty())&& params.custom_node_check && flag_node_exists } }
       steps {
         script {
           try {
@@ -43,7 +43,7 @@ pipeline {
       }
     }
     stage('Get Node Number/Add to Host file') {
-      when {  expression { params.NODE_NAME.isEmpty() && ! params.custom_node_check} }
+      when {  expression { (params.NODE_NAME==null || params.NODE_NAME.isEmpty()) && ! params.custom_node_check} }
       steps {
         script {
           try {
